@@ -1,0 +1,22 @@
+{
+    "model_name": "VoiceSpoofCNNV3",
+    "model_file": "D:\\DeepFake\\best_voice_spoof_cnn_v3.pt",
+    "task": "binary_voice_spoof_detection",
+    "classes": {
+        "0": "bonafide",
+        "1": "spoof"
+    },
+    "sample_rate": 16000,
+    "window_seconds": 2,
+    "n_mels": 64,
+    "input_channels": [
+        "log_mel",
+        "delta",
+        "delta_delta"
+    ],
+    "random_training_crop": true,
+    "channel_augmentation": true,
+    "selected_threshold": 0.62,
+    "best_dev_f1": 0.8210023866348448,
+    "dev_auc": 0.902025
+}

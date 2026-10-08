@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Verdict {
+  REAL
+  AI_MADE
+  UNSURE
+}
+
+enum Source {
+  CLIP
+  LIVE
+}
+
+enum AlertStatus {
+  SENT
+  FAILED
+  RETRYING
+}
+
+enum ReportStatus {
+  NEW
+  IN_REVIEW
+  RESOLVED
+}
+
+enum Sensitivity {
+  BALANCED
+  EXTRA_CAREFUL
+}
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique              // one account per number
+  email        String?   @unique
+  passwordHash String?
+  role         Role      @default(USER)
+  language  String   @default("en")
+  suspended Boolean  @default(false)
+  createdAt DateTime @default(now())
+  consents  Consent[]
+  settings  UserSettings?
+  calls     Call[]
+  sessions  Session[]
+}
+
+model Consent {                            // proof of what the user agreed to
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String                         // LIVE_CHECK or SMS_ALERTS
+  granted   Boolean
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+
+model UserSettings {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  smsAlerts       Boolean     @default(false)   // never on by default
+  liveProtection  Boolean     @default(false)
+  sensitivity     Sensitivity @default(BALANCED)
+  quietHoursStart Int?
+  quietHoursEnd   Int?
+  trustedNumbers  String[]
+}
+
+model Call {                               // RESULT ONLY. No audio fields, ever.
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source        Source
+  maskedNumber  String?
+  durationSec   Int?
+  language      String?
+  verdict       Verdict
+  aiProbability Float
+  reasons       String[]
+  modelVersion  String
+  createdAt     DateTime @default(now())
+  alert         Alert?
+  reports       Report[]
+  @@index([userId, createdAt])
+}
+
+model Alert {
+  id       String      @id @default(cuid())
+  callId   String      @unique
+  call     Call        @relation(fields: [callId], references: [id], onDelete: Cascade)
+  status   AlertStatus
+  attempts Int         @default(0)
+  sentAt   DateTime?
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  callId    String
+  call      Call         @relation(fields: [callId], references: [id], onDelete: Cascade)
+  status    ReportStatus @default(NEW)
+  note      String?
+  createdAt DateTime     @default(now())
+}
+
+model OtpCode {                            // hashes only, never the code itself
+  id         String   @id @default(cuid())
+  phoneHash  String   @unique
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  lastSentAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  action    String
+  createdAt DateTime @default(now())
+}

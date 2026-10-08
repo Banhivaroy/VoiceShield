@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16                 # the database program
+    environment:
+      POSTGRES_USER: voiceshield       # database user
+      POSTGRES_PASSWORD: devpassword   # only for your own computer
+      POSTGRES_DB: voiceshield         # database name
+    ports:
+      - "5433:5432"                    # computer port 5433 -> container port 5432
+    volumes:
+      - dbdata:/var/lib/postgresql/data   # keeps data after restart
+    healthcheck:                       # Docker asks "are you ready?"
+      test: ["CMD-SHELL", "pg_isready -U voiceshield -d voiceshield"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  redis:
+    image: redis:7                     # fast memory store for limits
+    ports:
+      - "6380:6379"                    # computer port 6380 -> container port 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  dbdata:

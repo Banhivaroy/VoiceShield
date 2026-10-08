@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #000000;
+    --ink: #ffffff;
+    --ink-muted: #ededed;
+    --ink-soft: #b9b9c3;
+    --panel: #181818;
+    --panel-2: #101012;
+    --white-btn: #fdfdfd;
+    --btn-ink: #050505;
+    --glass-fill: rgba(0,0,0,.78);
+    --glass-line: rgba(255,255,255,.09);
+    --glass-line-hover: rgba(255,255,255,.16);
+    --accent: #a78bfa;
+    --accent-text: #c4b5fd;
+    --ok: #a78bfa; --bad: #f87171; --warn: #fbbf24;
+    --e-reveal: cubic-bezier(.16,1,.3,1);
+    --e-soft: cubic-bezier(.25,.8,.3,1);
+    --u: min(calc(100vw / 1280), calc(100dvh / 760));
+  }
+  @supports not (height: 100dvh) {
+    :root {
+      --u: min(calc(100vw / 1280), calc(100vh / 760));
+    }
+  }
+  @media (max-width: 1160px) {
+    :root {
+      --u: min(max(0.9px, min(100vw/1280, 100dvh/760)), calc((100vw - 72px)/575), 100dvh/620);
+    }
+  }
+  @media (max-width: 552px) {
+    :root {
+      --u: 1px;
+    }
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink-muted);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  overflow-x: hidden;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+html.anim .ln { overflow: hidden; padding-top: .26em; margin-top: -.26em; }
+html.anim .ln-i { transform: translateY(100%); }
+html.anim .hidden-start { opacity: 0; }
+
+html.anim.go .ln-i {
+  transform: translateY(0);
+  transition: transform 1.05s var(--e-reveal);
+}
+html.anim.go .ln-2 .ln-i { transition-delay: 0.1s; }
